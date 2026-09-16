@@ -1,4 +1,3 @@
-```php
 <?php
 
 declare(strict_types=1);
@@ -15,7 +14,6 @@ class Main extends PluginBase{
 
     private static ?Main $instance = null;
 
-    /** @var array<string, bool> */
     public static array $options = [];
 
     protected function onEnable() : void{
@@ -72,4 +70,3 @@ class Main extends PluginBase{
         return self::$instance;
     }
 }
-```
