@@ -1,53 +1,75 @@
 <?php
 
-/***
- *       _____                    _                         _
- *      / ____|                  | |                       | |
- *     | (___   ___ ___  _ __ ___| |__   ___   __ _ _ __ __| |
- *      \___ \ / __/ _ \| '__/ _ \ '_ \ / _ \ / _` | '__/ _` |
- *      ____) | (_| (_) | | |  __/ |_) | (_) | (_| | | | (_| |
- *     |_____/ \___\___/|_|  \___|_.__/ \___/ \__,_|_|  \__,_|
- *
- *
- */
+declare(strict_types=1);
 
 namespace Ayzrix\Scoreboard\Tasks;
 
 use Ayzrix\Scoreboard\Events\Listener\PlayerListener;
 use Ayzrix\Scoreboard\Utils\Utils;
-use pocketmine\Player;
+use pocketmine\player\Player;
 use pocketmine\scheduler\Task;
 use pocketmine\Server;
 
-class ScoreboardTask extends Task {
+class ScoreboardTask extends Task{
 
-    public function onRun(int $currentTick) {
-        foreach (PlayerListener::$scoreboards as $name => $value) {
-            if (!Server::getInstance()->getPlayer($name) instanceof Player) {
+    public function onRun() : void{
+        $server = Server::getInstance();
+
+        foreach(PlayerListener::$scoreboards as $name => $scoreboard){
+
+            $player = $server->getPlayerExact($name);
+
+            if(!$player instanceof Player){
                 unset(PlayerListener::$scoreboards[$name]);
                 continue;
             }
-            $player = Server::getInstance()->getPlayer($name);
-            $scoreboard = PlayerListener::$scoreboards[$name];
-            if (Utils::getIntoConfig("per_world") === false) {
-                $scoreboard->setDisplayName(Utils::getIntoConfig("title"));
+
+            if(Utils::getIntoConfig("per_world") === false){
+
+                $scoreboard->setDisplayName(
+                    (string) Utils::getIntoConfig("title")
+                );
+
                 $i = 0;
-                foreach (Utils::getIntoConfig("lines") as $line) {
-                    $line = Utils::formateString($player, $line);
+
+                foreach(Utils::getIntoConfig("lines") as $line){
+                    $line = Utils::formateString(
+                        $player,
+                        (string) $line
+                    );
+
                     $scoreboard->setLine($i, $line);
                     $i++;
                 }
+
                 $scoreboard->set();
-            } else {
-                $levelName = $player->getLevel()->getFolderName();
-                if (isset(Utils::getIntoConfig("worlds")[$levelName])) {
-                    $scoreboard->setDisplayName(Utils::getIntoConfig("worlds")[$levelName]["title"]);
+
+            }else{
+
+                $worldName = $player->getWorld()->getFolderName();
+
+                $worlds = Utils::getIntoConfig("worlds");
+
+                if(isset($worlds[$worldName])){
+
+                    $worldConfig = $worlds[$worldName];
+
+                    $scoreboard->setDisplayName(
+                        (string) $worldConfig["title"]
+                    );
+
                     $i = 0;
-                    foreach (Utils::getIntoConfig("worlds")[$levelName]["lines"] as $line) {
-                        $line = Utils::formateString($player, $line);
+
+                    foreach($worldConfig["lines"] as $line){
+                        $line = Utils::formateString(
+                            $player,
+                            (string) $line
+                        );
+
                         $scoreboard->setLine($i, $line);
                         $i++;
                     }
+
                     $scoreboard->set();
                 }
             }
