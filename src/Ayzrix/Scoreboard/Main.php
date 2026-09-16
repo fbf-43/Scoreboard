@@ -1,15 +1,7 @@
+```php
 <?php
 
-/***
- *       _____                    _                         _
- *      / ____|                  | |                       | |
- *     | (___   ___ ___  _ __ ___| |__   ___   __ _ _ __ __| |
- *      \___ \ / __/ _ \| '__/ _ \ '_ \ / _ \ / _` | '__/ _` |
- *      ____) | (_| (_) | | |  __/ |_) | (_) | (_| | | | (_| |
- *     |_____/ \___\___/|_|  \___|_.__/ \___/ \__,_|_|  \__,_|
- *
- *
- */
+declare(strict_types=1);
 
 namespace Ayzrix\Scoreboard;
 
@@ -19,42 +11,65 @@ use Ayzrix\Scoreboard\Tasks\ScoreboardTask;
 use Ayzrix\Scoreboard\Utils\Utils;
 use pocketmine\plugin\PluginBase;
 
-class Main extends PluginBase {
+class Main extends PluginBase{
 
-    /** @var Main $instance */
-    private static $instance;
+    private static ?Main $instance = null;
 
-    /** @var array $options */
-    public static $options = [];
+    /** @var array<string, bool> */
+    public static array $options = [];
 
-    public function onEnable(){
+    protected function onEnable() : void{
         $this->saveDefaultConfig();
+
         self::$instance = $this;
-        $this->getServer()->getPluginManager()->registerEvents(new PlayerListener(), $this);
-        $this->getScheduler()->scheduleRepeatingTask(new ScoreboardTask(), Utils::getIntoConfig("update_time"));
+
+        $this->getServer()->getPluginManager()->registerEvents(
+            new PlayerListener(),
+            $this
+        );
+
         $this->checkDependencies();
-        if (Utils::getIntoConfig("command") === true) {
-            $this->getServer()->getCommandMap()->register("scoreboard", new Scoreboard($this));
+
+        if(Utils::getIntoConfig("command") === true){
+            $this->getServer()->getCommandMap()->register(
+                "scoreboard",
+                new Scoreboard($this)
+            );
         }
+
+        $this->getScheduler()->scheduleRepeatingTask(
+            new ScoreboardTask(),
+            (int) Utils::getIntoConfig("update_time")
+        );
     }
 
-    private function checkDependencies(): void {
-        foreach (Utils::getIntoConfig("options") as $pluginName => $bool) {
-            if ($bool === true) {
+    private function checkDependencies() : void{
+        foreach(Utils::getIntoConfig("options") as $pluginName => $bool){
+            if($bool === true){
                 $plugin = $this->getServer()->getPluginManager()->getPlugin($pluginName);
-                if (is_null($plugin)) {
-                    $this->getLogger()->notice("Please download a valid version of {$pluginName}");
+
+                if($plugin === null){
+                    $this->getLogger()->notice(
+                        "Please download a valid version of {$pluginName}"
+                    );
+
                     $this->getServer()->getPluginManager()->disablePlugin($this);
                     return;
-                } else self::$options[$pluginName] = true;
-            } else self::$options[$pluginName] = false;
+                }
+
+                self::$options[$pluginName] = true;
+            }else{
+                self::$options[$pluginName] = false;
+            }
         }
     }
 
-    /**
-     * @return Main
-     */
-    public static function getInstance(): Main {
+    public static function getInstance() : Main{
+        if(self::$instance === null){
+            throw new \LogicException("Plugin instance is not initialized");
+        }
+
         return self::$instance;
     }
 }
+```
