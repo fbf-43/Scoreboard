@@ -1,6 +1,7 @@
 [![Discord](https://img.shields.io/discord/868576710281531402.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/ftm8E4Avk7)  [![](https://poggit.pmmp.io/shield.api/Scoreboard)](https://poggit.pmmp.io/p/Scoreboard) [![](https://poggit.pmmp.io/shield.dl.total/Scoreboard)](https://poggit.pmmp.io/p/Scoreboard)
 # Scoreboard
-###### A simple Pocketmine-MP plugin for creating optimized scoreboards.
+###### A simple Pocketmine-MP plugin for creating optimized scoreboards. uptade by me and claude code
+
 
 ## Command
 | Name              | Usage             | Description                   | Enable                                    |
