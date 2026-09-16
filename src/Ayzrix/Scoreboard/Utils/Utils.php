@@ -1,15 +1,6 @@
 <?php
 
-/***
- *       _____                    _                         _
- *      / ____|                  | |                       | |
- *     | (___   ___ ___  _ __ ___| |__   ___   __ _ _ __ __| |
- *      \___ \ / __/ _ \| '__/ _ \ '_ \ / _ \ / _` | '__/ _` |
- *      ____) | (_| (_) | | |  __/ |_) | (_) | (_| | | | (_| |
- *     |_____/ \___\___/|_|  \___|_.__/ \___/ \__,_|_|  \__,_|
- *
- *
- */
+declare(strict_types=1);
 
 namespace Ayzrix\Scoreboard\Utils;
 
@@ -38,66 +29,432 @@ use Ayzrix\Scoreboard\Extensions\Skyblock;
 use Ayzrix\Scoreboard\Extensions\VanishV2;
 use Ayzrix\Scoreboard\Extensions\VoteParty;
 use Ayzrix\Scoreboard\Main;
-use pocketmine\Player;
+use pocketmine\player\Player;
 use pocketmine\Server;
-use Respect\Validation\Rules\Date;
 
-class Utils {
+class Utils{
 
     /**
-     * @param string $value
-     * @return bool|string|int|array
+     * @return mixed
      */
-    public static function getIntoConfig(string $value) {
-        $config = Main::getInstance()->getConfig();
-        return $config->get($value);
+    public static function getIntoConfig(string $value){
+        return Main::getInstance()->getConfig()->get($value);
     }
 
-    /**
-     * @param Player $player
-     * @param string $string
-     * @return string
-     */
-    public static function formateString(Player $player, string $string): string {
-        $string = str_replace(["{ping}", "{tps}", "{name}", "{online}", "{max_online}", "{level}", "{x}", "{y}", "{z}", "{ip}", "{port}", "{uid}", "{xuid}", "{health}", "{max_health}", "{food}", "{max_food}", "{gamemode}", "{scale}", "{xplevel}", "{id}", "{meta}", "{count}", "{date}"], [$player->getPing(), Server::getInstance()->getTicksPerSecond(), $player->getName(), count(Server::getInstance()->getOnlinePlayers()), Server::getInstance()->getMaxPlayers(), $player->getLevel()->getFolderName(), round($player->getX()), round($player->getY()), round($player->getZ()), $player->getAddress(), $player->getPort(), $player->getUniqueId(), $player->getXuid(), $player->getHealth(), $player->getMaxHealth(), $player->getFood(), $player->getMaxFood(), $player->getGamemode(), $player->getScale(), $player->getXpLevel(), $player->getInventory()->getItemInHand()->getId(), $player->getInventory()->getItemInHand()->getDamage(), $player->getInventory()->getItemInHand()->getCount(), Date(Utils::getIntoConfig("date_format"))], $string);
-        if (Main::$options["PiggyFactions"] === true) $string = str_replace(["{faction_name}", "{faction_rank}", "{faction_power}"], [PiggyFaction::getPlayerFaction($player), PiggyFaction::getPlayerRank($player), PiggyFaction::getFactionPower($player)], $string);
-        if (Main::$options["FactionsPro"] === true) $string = str_replace(["{faction_name}", "{faction_power}"], [FactionsPro::getPlayerFaction($player), FactionsPro::getFactionPower($player)], $string);
-        if (Main::$options["SimpleFaction"] === true) $string = str_replace(["{faction_name}", "{faction_rank}", "{faction_power}", "{faction_money}"], [SimpleFaction::getPlayerFaction($player), SimpleFaction::getPlayerRank($player), SimpleFaction::getFactionPower($player), SimpleFaction::getFactionMoney($player)], $string);
-        if (Main::$options["EconomyAPI"] === true) $string = str_replace(["{money}"], [EconomyAPI::getMoney($player)], $string);
-        if (Main::$options["PurePerms"] === true) $string = str_replace(["{rank}", "{prefix}", "{suffix}"], [PurePerms::getPlayerRank($player), PurePerms::getPlayerPrefix($player), PurePerms::getPlayerSuffix($player)], $string);
-        if (Main::$options["SkyBlock"] === true) $string = str_replace(["{island_blocks}", "{island_members}", "{island_rank}", "{island_size}"], [Skyblock::getIslandBlocks($player), Skyblock::getIslandMembers($player), Skyblock::getIslandRank($player), Skyblock::getIslandSize($player)], $string);
-        if (Main::$options["SeeDevice"] === true) $string = str_replace(["{device}"], [SeeDevice::getPlayerOs($player)], $string);
-        if (Main::$options["Bounty"] === true) $string = str_replace(["{bounty}"], [Bounty::getPlayerBounty($player)], $string);
-        if (Main::$options["Prisons"] === true) $string = str_replace(["{prisons_rank}", "{prisons_prestige}"], [Prisons::getPlayerRank($player), Prisons::getPlayerPrestige($player)], $string);
-        if (Main::$options["OnlineTime"] === true) $string = str_replace(["{onlinetime_session}", "{onlinetime_total}"], [OnlineTime::getSessionTime($player), OnlineTime::getTotalTime($player)], $string);
-        if (Main::$options["CombatLogger"] === true) $string = str_replace(["{combatlogger_time}"], [CombatLogger::getTaggedTime($player)], $string);
-        if (Main::$options["FightLogger"] === true) $string = str_replace(["{fightlogger_time}"], [FightLogger::getTaggedTime($player)], $string);
-        if (Main::$options["MyPlot"] === true) $string = str_replace(["{myplot_owner}", "{myplot_id}"], [MyPlot::getPlotOwner($player), MyPlot::getPlotID($player)], $string);
-        if (Main::$options["CoinsSystem"] === true) $string = str_replace(["{coins}"], [CoinsSystem::getPlayerCoins($player)], $string);
-        if (Main::$options["KDR"] === true) $string = str_replace(["{kills}", "{deaths}", "{kdr}"], [KDR::getPlayerKills($player), KDR::getPlayerDeaths($player), KDR::getPlayerKDR($player)], $string);
-        if (Main::$options["VoteParty"] === true) $string = str_replace(["{votes}", "{maxvotes}"], [VoteParty::getVotes(), VoteParty::getMaxVotes()], $string);
-        if (Main::$options["BankUI"] === true) $string = str_replace(["{balance}"], [BankUI::getPlayerBalance($player)], $string);
-        if (Main::$options["RedSkyBlock"] === true) $string = str_replace(["{island_members}", "{island_rank}", "{island_size}", "{island_value}", "{island_locked_status}"], [RedSkyBlock::getIslandMembers($player), RedSkyBlock::getIslandRank($player), RedSkyBlock::getIslandSize($player), RedSkyBlock::getIslandValue($player), RedSkyBlock::getIslandLocked($player)], $string);
-        if (Main::$options["VanishV2"] === true) $string = str_replace(["{vanish_fake_count}"], [VanishV2::getFakeCount()], $string);
-        if (Main::$options["MultiEconomy"] === true) $string = str_replace(MultiEconomy::getAllTags($player)[0], MultiEconomy::getAllTags($player)[1], $string);
-        if (Main::$options["RankSystem"] === true) $string = str_replace(["{rank}", "{prefix}"], [RankSystem::getPlayerRank($player), RankSystem::getPlayerPrefix($player)], $string);
-        if (Main::$options["MultiServerCounter"] === true) $string = str_replace(["{MultiServer.online}", "{MultiServer.Maxonline}"], [MultiServerCounter::getPlayerCount(), MultiServerCounter::getMaxPlayerCount()], $string);
-        if (Main::$options["Godmode"] === true) $string = str_replace(["{god}"], [Godmode::isPlayerGod($player)], $string);
-        if (Main::$options["FactionMaster"] === true) $string = str_replace(["{faction_name}", "{faction_rank}", "{faction_power}", "{faction_level}", "{faction_xp}", "{faction_message}", "{faction_description}", "{faction_visibility}"], [FactionMaster::getPlayerFaction($player), FactionMaster::getPlayerRank($player), FactionMaster::getFactionPower($player), FactionMaster::getFactionLevel($player), FactionMaster::getFactionXp($player), FactionMaster::getFactionMessage($player), FactionMaster::getFactionDescription($player), FactionMaster::getFactionVisibility($player)], $string);
+    public static function formateString(Player $player, string $string): string{
+
+        $server = Server::getInstance();
+
+        $world = $player->getWorld();
+        $position = $player->getPosition();
+        $item = $player->getInventory()->getItemInHand();
+
+        $replacements = [
+            "{ping}" => $player->getNetworkSession()->getPing(),
+            "{tps}" => $server->getTicksPerSecond(),
+            "{name}" => $player->getName(),
+            "{online}" => count($server->getOnlinePlayers()),
+            "{max_online}" => $server->getMaxPlayers(),
+
+            "{level}" => $world->getFolderName(),
+
+            "{x}" => round($position->getX()),
+            "{y}" => round($position->getY()),
+            "{z}" => round($position->getZ()),
+
+            "{ip}" => $player->getNetworkSession()->getIp(),
+            "{port}" => $player->getNetworkSession()->getPort(),
+
+            "{uid}" => $player->getUniqueId()->toString(),
+            "{xuid}" => $player->getXuid(),
+
+            "{health}" => $player->getHealth(),
+            "{max_health}" => $player->getMaxHealth(),
+
+            "{food}" => $player->getHungerManager()->getFood(),
+            "{max_food}" => 20,
+
+            "{gamemode}" => $player->getGamemode()->getName(),
+            "{scale}" => $player->getScale(),
+
+            "{xplevel}" => $player->getXpManager()->getXpLevel(),
+
+            "{id}" => $item->getTypeId(),
+            "{meta}" => $item->getStateId(),
+            "{count}" => $item->getCount(),
+
+            "{date}" => date(
+                (string) Utils::getIntoConfig("date_format")
+            ),
+        ];
+
+        $string = str_replace(
+            array_keys($replacements),
+            array_map(
+                static fn($value): string => (string) $value,
+                array_values($replacements)
+            ),
+            $string
+        );
+
+        /*
+         * Factions
+         */
+        if(Main::$options["PiggyFactions"] ?? false){
+            $string = str_replace(
+                ["{faction_name}", "{faction_rank}", "{faction_power}"],
+                [
+                    PiggyFaction::getPlayerFaction($player),
+                    PiggyFaction::getPlayerRank($player),
+                    PiggyFaction::getFactionPower($player)
+                ],
+                $string
+            );
+        }
+
+        if(Main::$options["FactionsPro"] ?? false){
+            $string = str_replace(
+                ["{faction_name}", "{faction_power}"],
+                [
+                    FactionsPro::getPlayerFaction($player),
+                    FactionsPro::getFactionPower($player)
+                ],
+                $string
+            );
+        }
+
+        if(Main::$options["SimpleFaction"] ?? false){
+            $string = str_replace(
+                [
+                    "{faction_name}",
+                    "{faction_rank}",
+                    "{faction_power}",
+                    "{faction_money}"
+                ],
+                [
+                    SimpleFaction::getPlayerFaction($player),
+                    SimpleFaction::getPlayerRank($player),
+                    SimpleFaction::getFactionPower($player),
+                    SimpleFaction::getFactionMoney($player)
+                ],
+                $string
+            );
+        }
+
+        /*
+         * Economy
+         */
+        if(Main::$options["EconomyAPI"] ?? false){
+            $string = str_replace(
+                ["{money}"],
+                [EconomyAPI::getMoney($player)],
+                $string
+            );
+        }
+
+        /*
+         * Permissions / Rank
+         */
+        if(Main::$options["PurePerms"] ?? false){
+            $string = str_replace(
+                ["{rank}", "{prefix}", "{suffix}"],
+                [
+                    PurePerms::getPlayerRank($player),
+                    PurePerms::getPlayerPrefix($player),
+                    PurePerms::getPlayerSuffix($player)
+                ],
+                $string
+            );
+        }
+
+        if(Main::$options["RankSystem"] ?? false){
+            $string = str_replace(
+                ["{rank}", "{prefix}"],
+                [
+                    RankSystem::getPlayerRank($player),
+                    RankSystem::getPlayerPrefix($player)
+                ],
+                $string
+            );
+        }
+
+        /*
+         * SkyBlock
+         */
+        if(Main::$options["SkyBlock"] ?? false){
+            $string = str_replace(
+                [
+                    "{island_blocks}",
+                    "{island_members}",
+                    "{island_rank}",
+                    "{island_size}"
+                ],
+                [
+                    Skyblock::getIslandBlocks($player),
+                    Skyblock::getIslandMembers($player),
+                    Skyblock::getIslandRank($player),
+                    Skyblock::getIslandSize($player)
+                ],
+                $string
+            );
+        }
+
+        /*
+         * Device
+         */
+        if(Main::$options["SeeDevice"] ?? false){
+            $string = str_replace(
+                ["{device}"],
+                [SeeDevice::getPlayerOs($player)],
+                $string
+            );
+        }
+
+        /*
+         * Bounty
+         */
+        if(Main::$options["Bounty"] ?? false){
+            $string = str_replace(
+                ["{bounty}"],
+                [Bounty::getPlayerBounty($player)],
+                $string
+            );
+        }
+
+        /*
+         * Prisons
+         */
+        if(Main::$options["Prisons"] ?? false){
+            $string = str_replace(
+                ["{prisons_rank}", "{prisons_prestige}"],
+                [
+                    Prisons::getPlayerRank($player),
+                    Prisons::getPlayerPrestige($player)
+                ],
+                $string
+            );
+        }
+
+        /*
+         * OnlineTime
+         */
+        if(Main::$options["OnlineTime"] ?? false){
+            $string = str_replace(
+                ["{onlinetime_session}", "{onlinetime_total}"],
+                [
+                    OnlineTime::getSessionTime($player),
+                    OnlineTime::getTotalTime($player)
+                ],
+                $string
+            );
+        }
+
+        /*
+         * Combat
+         */
+        if(Main::$options["CombatLogger"] ?? false){
+            $string = str_replace(
+                ["{combatlogger_time}"],
+                [CombatLogger::getTaggedTime($player)],
+                $string
+            );
+        }
+
+        if(Main::$options["FightLogger"] ?? false){
+            $string = str_replace(
+                ["{fightlogger_time}"],
+                [FightLogger::getTaggedTime($player)],
+                $string
+            );
+        }
+
+        /*
+         * MyPlot
+         */
+        if(Main::$options["MyPlot"] ?? false){
+            $string = str_replace(
+                ["{myplot_owner}", "{myplot_id}"],
+                [
+                    MyPlot::getPlotOwner($player),
+                    MyPlot::getPlotID($player)
+                ],
+                $string
+            );
+        }
+
+        /*
+         * Coins
+         */
+        if(Main::$options["CoinsSystem"] ?? false){
+            $string = str_replace(
+                ["{coins}"],
+                [CoinsSystem::getPlayerCoins($player)],
+                $string
+            );
+        }
+
+        /*
+         * KDR
+         */
+        if(Main::$options["KDR"] ?? false){
+            $string = str_replace(
+                ["{kills}", "{deaths}", "{kdr}"],
+                [
+                    KDR::getPlayerKills($player),
+                    KDR::getPlayerDeaths($player),
+                    KDR::getPlayerKDR($player)
+                ],
+                $string
+            );
+        }
+
+        /*
+         * VoteParty
+         */
+        if(Main::$options["VoteParty"] ?? false){
+            $string = str_replace(
+                ["{votes}", "{maxvotes}"],
+                [
+                    VoteParty::getVotes(),
+                    VoteParty::getMaxVotes()
+                ],
+                $string
+            );
+        }
+
+        /*
+         * Bank
+         */
+        if(Main::$options["BankUI"] ?? false){
+            $string = str_replace(
+                ["{balance}"],
+                [BankUI::getPlayerBalance($player)],
+                $string
+            );
+        }
+
+        /*
+         * RedSkyBlock
+         */
+        if(Main::$options["RedSkyBlock"] ?? false){
+            $string = str_replace(
+                [
+                    "{island_members}",
+                    "{island_rank}",
+                    "{island_size}",
+                    "{island_value}",
+                    "{island_locked_status}"
+                ],
+                [
+                    RedSkyBlock::getIslandMembers($player),
+                    RedSkyBlock::getIslandRank($player),
+                    RedSkyBlock::getIslandSize($player),
+                    RedSkyBlock::getIslandValue($player),
+                    RedSkyBlock::getIslandLocked($player)
+                ],
+                $string
+            );
+        }
+
+        /*
+         * Vanish
+         */
+        if(Main::$options["VanishV2"] ?? false){
+            $string = str_replace(
+                ["{vanish_fake_count}"],
+                [VanishV2::getFakeCount()],
+                $string
+            );
+        }
+
+        /*
+         * MultiEconomy
+         */
+        if(Main::$options["MultiEconomy"] ?? false){
+            $tags = MultiEconomy::getAllTags($player);
+
+            if(isset($tags[0], $tags[1])){
+                $string = str_replace(
+                    $tags[0],
+                    $tags[1],
+                    $string
+                );
+            }
+        }
+
+    
+        if(Main::$options["MultiServerCounter"] ?? false){
+            $string = str_replace(
+                ["{MultiServer.online}", "{MultiServer.Maxonline}"],
+                [
+                    MultiServerCounter::getPlayerCount(),
+                    MultiServerCounter::getMaxPlayerCount()
+                ],
+                $string
+            );
+        }
+
+        if(Main::$options["Godmode"] ?? false){
+            $string = str_replace(
+                ["{god}"],
+                [Godmode::isPlayerGod($player)],
+                $string
+            );
+        }
+
+        if(Main::$options["FactionMaster"] ?? false){
+            $string = str_replace(
+                [
+                    "{faction_name}",
+                    "{faction_rank}",
+                    "{faction_power}",
+                    "{faction_level}",
+                    "{faction_xp}",
+                    "{faction_message}",
+                    "{faction_description}",
+                    "{faction_visibility}"
+                ],
+                [
+                    FactionMaster::getPlayerFaction($player),
+                    FactionMaster::getPlayerRank($player),
+                    FactionMaster::getFactionPower($player),
+                    FactionMaster::getFactionLevel($player),
+                    FactionMaster::getFactionXp($player),
+                    FactionMaster::getFactionMessage($player),
+                    FactionMaster::getFactionDescription($player),
+                    FactionMaster::getFactionVisibility($player)
+                ],
+                $string
+            );
+        }
+
         return $string;
     }
 
-    /**
-     * @param float $money
-     * @return string
-     */
-    public static function convertMoney(float $money): string {
-        $suffixes = array('', 'k', 'M', 'B', 'T', 'q', 'Q', 's', 'S');
+    public static function convertMoney(float $money): string{
+        $suffixes = [
+            '',
+            'k',
+            'M',
+            'B',
+            'T',
+            'q',
+            'Q',
+            's',
+            'S'
+        ];
+
         $suffixIndex = 0;
-        while(abs($money) >= 1000 && $suffixIndex < 8) {
+
+        while(abs($money) >= 1000 && $suffixIndex < 8){
             $suffixIndex++;
             $money /= 1000;
         }
-        return ($money > 0 ? floor($money * 1000) / 1000 : ceil($money * 1000) / 1000) . $suffixes[$suffixIndex];
+
+        return (
+            $money > 0
+                ? floor($money * 1000) / 1000
+                : ceil($money * 1000) / 1000
+        ) . $suffixes[$suffixIndex];
     }
 }
